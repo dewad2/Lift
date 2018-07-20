@@ -1,9 +1,15 @@
 const { expect } = require('chai');
-const { sendOffElevators, totalPerLift } = require('./lift.js');
+const { sendOffElevators, totalPerLift, lift } = require('./lift.js');
 const { ElevatorQueue, ElevatorLog } = require('./Elevator');
 
 describe('sendOffElevators', () => {
   it('takes a sorted array, a lift capacity and a lift queue and assigns trips to lifts in a spread of high and low floors', () => {
+    let elevatorQueue = new ElevatorQueue();
+    elevatorQueue
+      .enqueue(0)
+      .enqueue(1)
+      .enqueue(2);
+    let elevatorLog = new ElevatorLog();
     expect(
       sendOffElevators(
         [
@@ -40,8 +46,8 @@ describe('sendOffElevators', () => {
           93
         ],
         4,
-        (elevatorQueue = new ElevatorQueue()),
-        (elevatorLog = new ElevatorLog())
+        elevatorQueue,
+        elevatorLog
       )
     ).to.deep.equal({
       '0': [
@@ -75,6 +81,9 @@ describe('lift', () => {
   it('sorts a line of people into elevators, to service them in the least amount of time', () => {
     expect(lift('10,21,24,30,7,24,24,17,37,26,12,34,35,5', 3, 3)).to.deep.equal(
       'TotalTime: 771 seconds Lift Logs: { 0: [[5, 7, 10],[26, 30, 34]], 1: [[12, 17, 21], [35, 37]], 2: [[24, 24, 24]] }'
+    );
+    expect(lift('10,21,24,30,7,24,24,17,37,26,12,34,35,5', 3, 3)).to.be.a(
+      'string'
     );
   });
 });
