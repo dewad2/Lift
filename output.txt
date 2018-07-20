@@ -1,2 +1,0 @@
-TotalTime: 0 seconds 
-Lift Logs: {}

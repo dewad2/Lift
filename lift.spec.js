@@ -1,131 +1,61 @@
 const { expect } = require('chai');
-const {
-  lift,
-  stringTo2DArray,
-  splitLifts,
-  differentFloors,
-  totalPerLift
-} = require('./lift.js');
+const { sendOffElevators, totalPerLift } = require('./lift.js');
+const { ElevatorQueue, ElevatorLog } = require('./Elevator');
 
-// describe('lift', () => {
-//   it('takes values M(number of elevators), N(number of floors), Q(people per car) and list of people in a queue and returns the shortest time to service them all', () => {
-//     // expect(decodeString('2[b3[a]]')).to.deep.equal('baaabaaa');
-//   });
-// });
-
-describe('splitLifts', () => {
-  it('takes a nested array of sorted groups, and a lift capacity, and splits each group into lifts', () => {
+describe('sendOffElevators', () => {
+  it('takes a sorted array, a lift capacity and a lift queue and assigns trips to lifts in a spread of high and low floors', () => {
     expect(
-      splitLifts(
+      sendOffElevators(
         [
-          [1, 2, 3, 4, 5, 5, 5, 6, 8, 9],
-          [2, 2, 3, 4, 5, 8, 9, 9, 10, 10],
-          [1, 1, 2, 4, 5, 6, 7, 9, 9, 10]
+          1,
+          2,
+          5,
+          8,
+          11,
+          11,
+          12,
+          19,
+          21,
+          23,
+          28,
+          29,
+          34,
+          34,
+          35,
+          35,
+          36,
+          42,
+          43,
+          44,
+          45,
+          47,
+          47,
+          49,
+          58,
+          61,
+          70,
+          71,
+          87,
+          90,
+          93
         ],
-        4
+        4,
+        (elevatorQueue = new ElevatorQueue()),
+        (elevatorLog = new ElevatorLog())
       )
-    ).to.deep.equal([
-      [[1, 2, 3, 4], [5, 5, 5, 6], [8, 9]],
-      [[2, 2, 3, 4], [5, 8, 9, 9], [10, 10]],
-      [[1, 1, 2, 4], [5, 6, 7, 9], [9, 10]]
-    ]);
-  });
-});
-
-describe('differentFloors', () => {
-  it('takes an an array and returns a count of the number of different values', () => {
-    expect(
-      differentFloors([1, 3, 3, 4, 6, 12, 18, 28, 38, 40, 40, 41])
-    ).to.deep.equal(10);
-  });
-});
-
-describe('stringTo2DArray', () => {
-  it('converts a string of integers into a nested array, with the nested arrays being of length number of lifts times capacity', () => {
-    expect(
-      stringTo2DArray(
-        '10,21,24,30,7,24,24,17,37,26,12,34,35,5,10,22,20,8,20,15,16,29,14,16,33,15,4,15,15,21,24,1,18,17,28,20,30,20,11,7,36,29,19,3,16,9,17,25,10,35,27,4,30,32,24,14,23,1,3,31,25,31,33,8,11,25,5,11,6,33',
-        3,
-        8
-      )
-    ).to.deep.equal([
-      [
-        '10',
-        '21',
-        '24',
-        '30',
-        '7',
-        '24',
-        '24',
-        '17',
-        '37',
-        '26',
-        '12',
-        '34',
-        '35',
-        '5',
-        '10',
-        '22',
-        '20',
-        '8',
-        '20',
-        '15',
-        '16',
-        '29',
-        '14',
-        '16'
+    ).to.deep.equal({
+      '0': [
+        ['1', '2', '5', '8'],
+        ['34', '34', '35', '35'],
+        ['58', '61', '70', '71']
       ],
-      [
-        '33',
-        '15',
-        '4',
-        '15',
-        '15',
-        '21',
-        '24',
-        '1',
-        '18',
-        '17',
-        '28',
-        '20',
-        '30',
-        '20',
-        '11',
-        '7',
-        '36',
-        '29',
-        '19',
-        '3',
-        '16',
-        '9',
-        '17',
-        '25'
+      '1': [
+        ['11', '11', '12', '19'],
+        ['36', '42', '43', '44'],
+        ['87', '90', '93']
       ],
-      [
-        '10',
-        '35',
-        '27',
-        '4',
-        '30',
-        '32',
-        '24',
-        '14',
-        '23',
-        '1',
-        '3',
-        '31',
-        '25',
-        '31',
-        '33',
-        '8',
-        '11',
-        '25',
-        '5',
-        '11',
-        '6',
-        '33'
-      ]
-    ]);
+      '2': [['21', '23', '28', '29'], ['45', '47', '47', '49']]
+    });
   });
 });
 
@@ -133,10 +63,18 @@ describe('totalPerLift', () => {
   it('takes an object as input and reduces its values into an array of the totals at each key', () => {
     expect(
       totalPerLift({
-        0: [28, 12, 32, 13, 26],
-        2: [8, 35, 10, 28, 12, 28],
-        3: [19, 6, 24, 12, 23]
+        0: [[28, 12, 32, 13, 26], [1, 2, 3, 4, 5], [1, 2]],
+        2: [[8, 35, 10, 28, 12, 28], [23, 23, 24, 24, 25], [5, 6]],
+        3: [[19, 6, 24, 12, 23], [2, 3, 4, 4, 5], [34, 34]]
       })
     ).to.deep.equal([111, 121, 84]);
+  });
+});
+
+describe('lift', () => {
+  it('sorts a line of people into elevators, to service them in the least amount of time', () => {
+    expect(lift('10,21,24,30,7,24,24,17,37,26,12,34,35,5', 3, 3)).to.deep.equal(
+      'TotalTime: 771 seconds Lift Logs: { 0: [[5, 7, 10],[26, 30, 34]], 1: [[12, 17, 21], [35, 37]], 2: [[24, 24, 24]] }'
+    );
   });
 });
